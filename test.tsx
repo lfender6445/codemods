@@ -6,7 +6,7 @@ describe('Hello, Enzyme!', () => {
         const wrapper = shallow(<div>
             <h1>Hello, Enzyme!</h1>
         </div>)
-        expect(wrapper.find('h1').html()).toMatch(/Hello, Enzyme/)
+        expect(screen.getByRole('h1').html()).toMatch(/Hello, Enzyme/)
     })
 
     it('renders snapshots, too', () => {
