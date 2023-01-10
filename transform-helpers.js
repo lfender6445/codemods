@@ -2,7 +2,7 @@ const jscodeshift = require("jscodeshift");
 
 export const addRTLImport = (j) => (
   j.importDeclaration(
-    [j.importDefaultSpecifier(j.identifier('{ screen, getByRole }'))],
+    [j.importDefaultSpecifier(j.identifier('{ getByRole, render, screen }'))],
     j.stringLiteral('react-testing-library')
   )
 )
@@ -17,20 +17,30 @@ export const replaceFindMethods = (j, source) => {
         },
       })
       .forEach((path) => {
-        if (path.value.callee.object.name === 'wrapper') {
+        if (path.value.callee.object.name === 'wrapper.') {
           // yay, we found wrapper.find
           // Extract the argument passed to enzyme.find
           const argument = path.node.arguments[0];
           // Create a new call to the RTL method `getByRole`
           const rtlCall = j.callExpression(
             j.memberExpression(
-              j.identifier("screen"),
-              j.identifier("getByRole")
+              j.identifier("screen."),
+              j.identifier("getByRole.")
             ),
             [argument]
           );
           // Replace the enzyme call with the RTL call
           j(path).replaceWith(rtlCall);
+        }
+
+        if (path.value.callee.object.name === 'const wrapper = shallow') {
+          const argument = path.node.arguments[0]
+          const replaceWrapperWithRender = j.callExpression(
+            j.memberExpression(
+              j.identifier('render')
+            ),
+            argument
+          )
         }
       })
   )
